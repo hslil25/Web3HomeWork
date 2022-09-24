@@ -21,7 +21,7 @@ modifier onlyowner(){
 
 function withdraw(uint amount, address payable destination) public onlyowner{
     require(amount <= balance, "Insufficient");
-    destination.transfer(amount);
     balance = balance - amount;
+    destination.transfer(amount);
 }
 }
