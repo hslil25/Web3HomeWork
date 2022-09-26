@@ -6,7 +6,7 @@ contract toDoList{
         bool hasDone;
         string job;
     }
-    //29357 gas
+    //29357 gas to view this public data
     toDo[] public toDoArr;
 
     function create(string calldata text) external{
@@ -21,7 +21,7 @@ contract toDoList{
     }
 
     function getToDo(uint index) external view returns (string memory,bool){
-        //29441 gas
+        //29441 gas to use function
         toDo storage todo = toDoArr[index];
         return (todo.job,todo.hasDone);
     }
