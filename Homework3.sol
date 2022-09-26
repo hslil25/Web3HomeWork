@@ -11,7 +11,7 @@ contract fund{
         uint32 start,
         uint32 end
     );
-
+//A helper that I added to help while launching an event.
     function time() external view returns (uint){
         return block.timestamp;
     }
@@ -21,6 +21,7 @@ contract fund{
     event Unpledge(uint indexed id, address user, uint amount);
     event Claim(uint id);
     event Refund(uint id, address indexed user, uint amount);
+    //Definiton for campaign
     struct Campaign{
         address creator;
         uint goal;
@@ -29,9 +30,12 @@ contract fund{
         uint pledged;
         bool claimed;
     }
+    //Using count as a dynamic number for "active" campaigns.
     uint public count = 0;
+    //Index in order to store in the array
     uint public index = 0;
-
+    
+    //ERC20 protocol token creation
     IERC20 public immutable token;
     mapping (uint=>Campaign) public campaigns;
     mapping (uint=>mapping(address=>uint)) public pledgedAmount;
@@ -40,7 +44,8 @@ contract fund{
     constructor (address _token) payable {
         token = IERC20(_token);
     }
-
+    
+    //Launching the event with three parameters (using time() function here)
     function launch(
         uint _goal,
         uint32 _start,
@@ -64,7 +69,7 @@ contract fund{
 
 
     }
-
+    //Closing an event and decrementing the count however keeping the index same.
     function close(uint id) external{
         Campaign memory cmpn = campaigns[id];
         require(cmpn.creator == msg.sender,"Denied");
@@ -75,9 +80,9 @@ contract fund{
         emit Delete(id);
 
     }
-
     function pledge(uint _id, uint _amount) payable external {
         Campaign storage campaign = campaigns[_id];
+        //Is campaign still going on?
         require(block.timestamp >= campaign.start, "not started");
         require(block.timestamp <= campaign.end, "ended");
 
@@ -90,6 +95,8 @@ contract fund{
 
     function unpledge(uint _id, uint _amount) external {
         Campaign storage campaign = campaigns[_id];
+        //Is campaign still going on?
+        
         require(block.timestamp <= campaign.end, "ended");
 
         campaign.pledged -= _amount;
@@ -98,9 +105,10 @@ contract fund{
 
         emit Unpledge(_id, msg.sender, _amount);
     }
-
+    //Claim function satisfying the necessary conditions
     function claim(uint _id) external {
         Campaign storage campaign = campaigns[_id];
+        //Trying to keep error messages short for gas efficiency
         require(campaign.creator == msg.sender, "not creator");
         require(block.timestamp > campaign.end, "not ended");
         require(campaign.pledged >= campaign.goal, "pledged < goal");
@@ -112,10 +120,13 @@ contract fund{
         emit Claim(_id);
     }
 
+   
     function refund(uint id) external{
         Campaign memory campaign = campaigns[id];
         require(campaign.pledged < campaign.goal, "Pledged >= Goal");
         
+        //We are sure that no one has no balance in the campaign as they would use this function and they will pay gas so need to think
+        // if bal == 0 condition
         uint bal = pledgedAmount[id][msg.sender];
         pledgedAmount[id][msg.sender] = 0;
         token.transfer(msg.sender, bal);
