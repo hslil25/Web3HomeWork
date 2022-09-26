@@ -29,7 +29,7 @@ contract toDoList{
     function completed(uint index) external  {
         //46320 gas
         //toDoArr[index].hasDone = !toDoArr[index].hasDone;
-        //26084 gas
+        //26084 gas - as this is more gas efficient I am using this code
         toDoArr[index].hasDone = false;
     }
 }
